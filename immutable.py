@@ -11,26 +11,33 @@ class Immutable(object):
     __delitem__ = __setitem__ = __setattr__ = _immutable
 
 
-class ImmutableList(list):
+class ImmutableList(Immutable, list):
 
-    def __init__(self, *arg, **kwargs):
+    def __init__(self, list_val, *arg, **kwargs):
+        if not isinstance(list_val, list):
+            raise ValueError('%s shold be of list' % str(list_val))
         super(ImmutableList, self).__init__(*arg, **kwargs)
+        for val in list_val:
+            self.append(val)
+
+    def __new__(self):
+        self.append = self._immutable
 
     def __hash__(self):
         return hash(tuple(self))
 
 
-c = ImmutableList()
-c.append(1)
-c.append(123)
-c.append(345)
-print('Printing')
-print(c)
+if __name__ == '__main__':
+    c = ImmutableList([1, 123, 345])
 
-try:
-    c[1] = 11111
-except TypeError:
-    print('Type Error')
+    print(c)
+    print(dir(c))
+    try:
+        c[1] = 11111
+    except TypeError:
+        print('Type Error')
 
-d = {c: c}
-print(d)
+    d = {c: c}
+    print(d[c])
+    c.append(321)
+    print(d[c])
